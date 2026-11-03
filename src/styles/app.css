@@ -718,11 +718,33 @@ input[type="range"] {
 
 /* ---------- 色块 / 颜色选择 ---------- */
 .swatch {
+  position: relative;
   width: 34px;
   height: 34px;
   border-radius: var(--radius);
   border: 1px solid var(--border-strong);
   flex-shrink: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+
+.swatch:hover {
+  border-color: var(--primary);
+}
+
+/* 原生取色器铺满整个色块：靠 opacity 隐身而不是 visibility/display，
+   否则点不到它。露出来的是外层 .swatch 的背景色 */
+.swatch__input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  opacity: 0;
+  cursor: pointer;
 }
 
 /* 输入框下方的颜色分组：小标题（右侧可挂操作）+ 一排色块 */

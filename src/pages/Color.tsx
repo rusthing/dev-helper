@@ -93,7 +93,22 @@ export default function Color() {
             placeholder="#5b6cff、rgb(91,108,255)、#f00"
             spellCheck={false}
           />
-          <div className="swatch" style={{ background: current || "transparent" }} />
+          {/* 色块本身就是原生取色器：input 透明铺满，露出来的是下面这层背景色，
+              点哪儿都能弹系统调色板（macOS 是 NSColorPanel） */}
+          <div
+            className="swatch"
+            style={{ background: current || "transparent" }}
+            title="点击打开取色器"
+          >
+            <input
+              type="color"
+              className="swatch__input"
+              // type=color 只吃 #rrggbb，info 还没回来时先给个默认值
+              value={current || "#5b6cff"}
+              onChange={(e) => setInput(e.target.value)}
+              aria-label="选择颜色"
+            />
+          </div>
         </div>
         {info?.error && <div className="err-box">{info.error}</div>}
 
