@@ -13,6 +13,7 @@ export default function Json() {
   const [err, setErr] = useState("");
   const [indent, setIndent] = usePref<Indent>("json.indent", "2");
   const [sortKeys, setSortKeys] = usePref("json.sortKeys", false);
+  const [expand, setExpand] = usePref("json.expand", false);
 
   useEffect(() => {
     const id = window.setTimeout(async () => {
@@ -27,6 +28,7 @@ export default function Json() {
           indent: Number(indent),
           sortKeys,
           minify: false,
+          expandStrings: expand,
         });
         setOut(r);
         setErr("");
@@ -36,7 +38,7 @@ export default function Json() {
       }
     }, 150);
     return () => window.clearTimeout(id);
-  }, [input, indent, sortKeys]);
+  }, [input, indent, sortKeys, expand]);
 
   async function minify() {
     try {
@@ -46,6 +48,7 @@ export default function Json() {
           indent: 2,
           sortKeys,
           minify: true,
+          expandStrings: expand,
         }),
       );
       setErr("");
@@ -75,6 +78,14 @@ export default function Json() {
                 onChange={(e) => setSortKeys(e.target.checked)}
               />
               键排序
+            </label>
+            <label className="check" title="把 ext 这类「字符串里套 JSON」的值也解析展开成嵌套对象">
+              <input
+                type="checkbox"
+                checked={expand}
+                onChange={(e) => setExpand(e.target.checked)}
+              />
+              展开内嵌 JSON
             </label>
             <button type="button" className="btn sm" onClick={minify}>
               压缩成一行

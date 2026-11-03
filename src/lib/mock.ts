@@ -447,7 +447,31 @@ export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
 
     case "json_format": {
       try {
-        const v = JSON.parse(str("text"));
+        const parsed = JSON.parse(str("text"));
+        // 和 Rust 侧 json::expand_value 保持一致：只展开本身是对象 / 数组的
+        // 字符串，标量字符串（"123" "true" 等）保留。
+        // 注意：这是浏览器预览用的假后端，走 JS 的 number，超过 2^53 的雪花 ID
+        // 会丢精度；真实 Tauri 里是 Rust serde_json，按 i64 精确解析
+        const expandValue = (v: unknown): unknown => {
+          if (Array.isArray(v)) return v.map(expandValue);
+          if (v && typeof v === "object") {
+            const out: Record<string, unknown> = {};
+            for (const k of Object.keys(v as Record<string, unknown>)) {
+              out[k] = expandValue((v as Record<string, unknown>)[k]);
+            }
+            return out;
+          }
+          if (typeof v === "string") {
+            try {
+              const inner = JSON.parse(v);
+              if (inner && typeof inner === "object") return expandValue(inner);
+            } catch {
+              /* 不是 JSON，保留原字符串 */
+            }
+          }
+          return v;
+        };
+        const v = a.expandStrings ? expandValue(parsed) : parsed;
         return a.minify ? JSON.stringify(v) : JSON.stringify(v, null, Number(a.indent ?? 2));
       } catch (e) {
         throw new Error(`JSON 语法错误：${(e as Error).message}`);
