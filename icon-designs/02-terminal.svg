@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#2E3A63"/>
+      <stop offset="1" stop-color="#0D1020"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.6" r="0.55">
+      <stop offset="0" stop-color="#3DDC97" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#3DDC97" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="win" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A3557"/>
+      <stop offset="1" stop-color="#161C33"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="20" stdDeviation="26" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+    <filter id="neon" x="-120%" y="-120%" width="340%" height="340%">
+      <feGaussianBlur stdDeviation="18" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#glow)"/>
+
+  <g filter="url(#ds)">
+    <rect x="164" y="264" width="696" height="496" rx="62" fill="url(#win)" stroke="#54679F" stroke-width="10"/>
+    <!-- 窗口三点 -->
+    <circle cx="242" cy="330" r="16" fill="#FF5F57"/>
+    <circle cx="296" cy="330" r="16" fill="#FEBC2E"/>
+    <circle cx="350" cy="330" r="16" fill="#28C840"/>
+    <line x1="172" y1="384" x2="852" y2="384" stroke="#2B3557" stroke-width="8"/>
+
+    <!-- 提示符：> 加光标 -->
+    <path d="M391 466 L487 560 L391 654" fill="none" stroke="#8FA0FF" stroke-width="44"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="527" y="474" width="124" height="172" rx="24" fill="#3DDC97" filter="url(#neon)"/>
+  </g>
+</svg>

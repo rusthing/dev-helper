@@ -1,0 +1,68 @@
+/* ============================================================
+   设计系统：亮 / 暗 两套 CSS 变量
+   对齐的基本原则——所有"对齐"都通过 CSS Grid 的列定义声明，
+   而不是手算像素。改字号、改窗口宽度，布局自动重排。
+   ============================================================ */
+
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --surface-2: #f1f2f5;
+  --surface-3: #e9ebf0;
+  --border: #e4e7ec;
+  --border-strong: #d4d8e0;
+  --text: #1d2129;
+  --text-soft: #4e5969;
+  --text-muted: #86909c;
+  --primary: #5b6cff;
+  --primary-hover: #4a59ee;
+  --primary-soft: #eef0ff;
+  --primary-text: #ffffff;
+  --danger: #f53f3f;
+  --danger-soft: #ffece8;
+
+  --radius-lg: 12px;
+  --radius: 9px;
+  --radius-sm: 6px;
+
+  --shadow-sm: 0 1px 2px rgba(20, 24, 40, 0.04), 0 1px 3px rgba(20, 24, 40, 0.06);
+  --shadow: 0 6px 20px rgba(20, 24, 40, 0.08);
+
+  --sidebar-w: 240px;
+  --status-h: 30px;
+  --content-max: 1000px;
+  --content-pad: 26px;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC",
+    "Microsoft YaHei", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  --fs-xs: 12px;
+  --fs-sm: 13px;
+  --fs-base: 14px;
+  --fs-md: 15px;
+  --fs-lg: 17px;
+  --fs-title: 22px;
+}
+
+[data-theme="dark"] {
+  --bg: #0c0e12;
+  --surface: #171b23;
+  --surface-2: #1e232d;
+  --surface-3: #272d3a;
+  --border: #2c323e;
+  --border-strong: #3a4150;
+  --text: #eceef1;
+  --text-soft: #bcc3ce;
+  --text-muted: #8b94a4;
+  --primary: #7c8aff;
+  --primary-hover: #8e99ff;
+  --primary-soft: #1f2547;
+  --primary-text: #0e1014;
+  --danger: #f76560;
+  --danger-soft: #3a211f;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}

@@ -1,0 +1,40 @@
+[package]
+name = "dev-helper"
+version = "0.1.0"
+description = "离线开发者工具箱"
+edition = "2021"
+
+# 构建产物名，对应 `src/lib.rs` 里的 `run()`
+[lib]
+name = "dev_helper_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-dialog = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+
+# ---- 工具算法依赖（随页面推进逐步加入） ----
+sha1 = "0.11"
+sha2 = "0.11"
+md-5 = "0.11"
+sm3 = "0.5"
+hmac = "0.13"
+digest = "0.11"
+chrono = { version = "0.4", features = ["serde"] }
+chrono-tz = "0.10"
+base64 = "0.23"
+percent-encoding = "2"
+uuid = { version = "1", features = ["v4", "v7"] }
+rand = "0.9"
+regex = "1"
+similar = "2"
+sqlformat = "0.5"
+dprint-plugin-typescript = "0.96"
+qrcode = { version = "0.14", default-features = false, features = ["svg", "image"] }
+image = { version = "0.25", default-features = false, features = ["png"] }

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.35" y2="1">
+      <stop offset="0" stop-color="#6675FF"/>
+      <stop offset="1" stop-color="#2A2FB8"/>
+    </linearGradient>
+    <linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD888"/>
+      <stop offset="1" stop-color="#F3AE35"/>
+    </linearGradient>
+    <linearGradient id="body" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EFAE43"/>
+      <stop offset="1" stop-color="#D08418"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="175%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#0B0E2A" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+
+  <g filter="url(#ds)" transform="translate(0,-40)">
+    <!-- 提手 -->
+    <path d="M398 436 V376 a58 58 0 0 1 58-58 h112 a58 58 0 0 1 58 58 v60"
+          fill="none" stroke="#FFC65C" stroke-width="52" stroke-linecap="round"/>
+    <!-- 箱盖 -->
+    <rect x="196" y="426" width="632" height="150" rx="44" fill="url(#lid)"/>
+    <!-- 箱体 -->
+    <rect x="236" y="556" width="552" height="300" rx="48" fill="url(#body)"/>
+    <!-- 卡扣 -->
+    <rect x="470" y="544" width="84" height="48" rx="14" fill="#C97F16"/>
+    <!-- 箱体上的终端屏 -->
+    <rect x="318" y="628" width="388" height="156" rx="30" fill="#161A32"/>
+    <path d="M440 668 L488 706 L440 744" fill="none" stroke="#4AE3A6" stroke-width="26"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="506" y="732" width="88" height="22" rx="11" fill="#4AE3A6"/>
+  </g>
+</svg>

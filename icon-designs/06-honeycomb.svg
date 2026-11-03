@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FFC96B"/>
+      <stop offset="1" stop-color="#EE7A0C"/>
+    </linearGradient>
+    <linearGradient id="cell" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#FFFDF6"/>
+      <stop offset="1" stop-color="#FFEFCE"/>
+    </linearGradient>
+    <linearGradient id="core" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#2A2F4A"/>
+      <stop offset="1" stop-color="#12151F"/>
+    </linearGradient>
+    <filter id="ds" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#8A3A00" flood-opacity="0.35"/>
+    </filter>
+    <path id="hex" d="M132 0 L66 114.3 L-66 114.3 L-132 0 L-66 -114.3 L66 -114.3 Z"/>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+
+  <g filter="url(#ds)">
+    <!-- 六个邻居 -->
+    <g fill="url(#cell)">
+      <use href="#hex" transform="translate(512 252)"/>
+      <use href="#hex" transform="translate(512 772)"/>
+      <use href="#hex" transform="translate(287 382)"/>
+      <use href="#hex" transform="translate(737 382)"/>
+      <use href="#hex" transform="translate(287 642)"/>
+      <use href="#hex" transform="translate(737 642)"/>
+    </g>
+
+    <!-- 中心格：深色 + 提示符 -->
+    <use href="#hex" transform="translate(512 512)" fill="url(#core)"/>
+    <path d="M464 474 L498 512 L464 550" fill="none" stroke="#FFC24B" stroke-width="24"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="512" y="538" width="56" height="20" rx="10" fill="#FFC24B"/>
+  </g>
+</svg>

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FF9A5B"/>
+      <stop offset="1" stop-color="#D2328E"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.55" stop-color="#E3E9FB"/>
+      <stop offset="1" stop-color="#AEB9D6"/>
+    </linearGradient>
+    <mask id="jaw">
+      <circle cx="512" cy="352" r="100" fill="#fff"/>
+      <rect x="466" y="216" width="92" height="176" fill="#000"/>
+    </mask>
+    <filter id="ds" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="22" flood-color="#5A0B33" flood-opacity="0.4"/>
+    </filter>
+    <filter id="spark" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge>
+        <feMergeNode in="b"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+
+  <g filter="url(#ds)">
+    <!-- 扳手：竖直画好再整体旋转 -->
+    <g transform="rotate(-38 512 512)">
+      <rect x="482" y="418" width="60" height="330" rx="30" fill="url(#steel)"/>
+      <circle cx="512" cy="352" r="100" fill="url(#steel)" mask="url(#jaw)"/>
+      <circle cx="512" cy="748" r="46" fill="url(#steel)"/>
+      <circle cx="512" cy="748" r="20" fill="#E8508F"/>
+    </g>
+
+    <!-- 火星 -->
+    <g fill="#FFE79B" filter="url(#spark)">
+      <path d="M286 300 C 294 336, 304 346, 340 354 C 304 362, 294 372, 286 408 C 278 372, 268 362, 232 354 C 268 346, 278 336, 286 300 Z"/>
+      <path d="M742 452 C 748 480, 756 488, 784 494 C 756 500, 748 508, 742 536 C 736 508, 728 500, 700 494 C 728 488, 736 480, 742 452 Z"/>
+      <path d="M636 206 C 640 226, 646 232, 666 236 C 646 240, 640 246, 636 266 C 632 246, 626 240, 606 236 C 626 232, 632 226, 636 206 Z"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+.DS_Store
+*.log
+
+# 图标产物：源是 icon-designs 下的 *.svg / build.mjs / template，PNG 和拼图页随时能重出
+# （20 个 PNG + contact-sheet.html 一共 49MB，别进仓库）
+icon-designs/**/*.png
+icon-designs/**/contact-sheet.html
+
+# 旧图标源（紫色 </> 那版），已被 icon-designs/robot 取代，留在本地不提交
+.icon-src/

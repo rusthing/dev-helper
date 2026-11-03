@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#28304F"/>
+      <stop offset="1" stop-color="#0B0E18"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#5B6CFF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#5B6CFF" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#A6B4FF"/>
+      <stop offset="1" stop-color="#3B44C9"/>
+    </linearGradient>
+    <linearGradient id="tooth" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8E9CFF"/>
+      <stop offset="1" stop-color="#333BB0"/>
+    </linearGradient>
+    <filter id="ds" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="18" stdDeviation="24" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#glow)"/>
+
+  <g filter="url(#ds)">
+    <!-- 六个齿：同一个矩形绕中心每 60° 复制一次 -->
+    <g fill="url(#tooth)">
+      <rect x="447" y="207" width="130" height="112" rx="30"/>
+      <rect x="447" y="207" width="130" height="112" rx="30" transform="rotate(60 512 512)"/>
+      <rect x="447" y="207" width="130" height="112" rx="30" transform="rotate(120 512 512)"/>
+      <rect x="447" y="207" width="130" height="112" rx="30" transform="rotate(180 512 512)"/>
+      <rect x="447" y="207" width="130" height="112" rx="30" transform="rotate(240 512 512)"/>
+      <rect x="447" y="207" width="130" height="112" rx="30" transform="rotate(300 512 512)"/>
+    </g>
+
+    <!-- 六角螺母本体 -->
+    <path d="M812 512 L662 772 L362 772 L212 512 L362 252 L662 252 Z" fill="url(#steel)"/>
+    <!-- 内孔 -->
+    <path d="M652 512 L582 633 L442 633 L372 512 L442 391 L582 391 Z" fill="#12151F"/>
+    <!-- 孔里的提示符 -->
+    <path d="M452 462 L492 512 L452 562" fill="none" stroke="#7C8AFF" stroke-width="26"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="512" y="548" width="64" height="22" rx="11" fill="#7C8AFF"/>
+  </g>
+</svg>
