@@ -1040,3 +1040,49 @@ html.theme-fading *::after {
     animation: none;
   }
 }
+
+/* ---------- JSON 结果高亮（模板占位符） ---------- */
+.code-pre {
+  margin: 0;
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow: auto;
+  max-height: 360px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.code-pre code {
+  font: inherit;
+  color: inherit;
+  background: none;
+  white-space: inherit;
+}
+.code-empty {
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  padding: 12px 14px;
+}
+/* 两类占位符用不同颜色，一眼区分注入语法 */
+.token-inject {
+  border-radius: var(--radius-sm);
+  padding: 0 3px;
+  font-weight: 600;
+}
+.token-inject--mustache {
+  color: var(--primary);
+  background: var(--primary-soft);
+}
+.token-inject--expr {
+  color: #c5530a;
+  background: #fbeede;
+}
+[data-theme="dark"] .token-inject--expr {
+  color: #f5a85a;
+  background: #3a2a17;
+}
