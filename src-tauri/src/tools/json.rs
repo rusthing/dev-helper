@@ -3,6 +3,19 @@ use serde_json::Value;
 const IND2: &[u8] = b"  ";
 const IND4: &[u8] = b"    ";
 
+/// 把 serde_json 的语法错误包成带行列的结构，序列化成 JSON 字符串放进
+/// Err(String) 通道。这样 Tauri 侧错误语义不变（一直是 Err(String)），
+/// 前端只要 JSON.parse 一次就能拿到 message / line / column 去定位高亮。
+/// line / column 均为 1 基，直接来自 serde_json::Error。
+fn syntax_error(e: serde_json::Error) -> String {
+    serde_json::json!({
+        "message": format!("JSON 语法错误：{e}"),
+        "line": e.line(),
+        "column": e.column(),
+    })
+    .to_string()
+}
+
 fn sort_value(v: Value) -> Value {
     match v {
         Value::Object(map) => {
@@ -55,7 +68,7 @@ pub fn json_format(
     if text.trim().is_empty() {
         return Ok(String::new());
     }
-    let v: Value = serde_json::from_str(&text).map_err(|e| format!("JSON 语法错误：{e}"))?;
+    let v: Value = serde_json::from_str(&text).map_err(syntax_error)?;
     // 先展开内嵌 JSON，再排序（排序对展开出来的嵌套结构同样递归生效）
     let v = if expand_strings { expand_value(v) } else { v };
     let v = if sort_keys { sort_value(v) } else { v };
@@ -158,5 +171,32 @@ mod tests {
         )
         .unwrap();
         assert!(out.contains("\"inner\": {"), "嵌套的 JSON 字符串也应被展开");
+    }
+
+    #[test]
+    fn syntax_error_carries_position() {
+        let raw = json_format("{oops".into(), 2, false, false, false).unwrap_err();
+        let v: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert!(v["message"].as_str().unwrap().starts_with("JSON 语法错误"));
+        assert_eq!(v["line"], 1);
+        assert!(v["column"].as_u64().unwrap() >= 1);
+    }
+
+    #[test]
+    fn syntax_error_points_to_later_line() {
+        let raw = json_format(
+            "{\n  \"a\": 1,\n  \"b\": ,\n}".into(),
+            2,
+            false,
+            false,
+            false,
+        )
+        .unwrap_err();
+        let v: serde_json::Value = serde_json::from_str(&raw).unwrap();
+        assert!(
+            v["line"].as_u64().unwrap() >= 3,
+            "错误应定位到靠后的行，实际：{v}"
+        );
+        assert!(v["column"].as_u64().unwrap() >= 1);
     }
 }

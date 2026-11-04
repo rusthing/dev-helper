@@ -303,6 +303,49 @@ function renderTree(v: unknown, indent: number): string {
   return `${pad}${String(v)}\n`;
 }
 
+/** 字符串绝对偏移 → 1 基行列，和 Rust serde_json 的 line()/column() 对齐 */
+function offsetToLineCol(text: string, offset: number) {
+  const before = text.slice(0, offset);
+  return { line: before.split("\n").length, column: offset - before.lastIndexOf("\n") };
+}
+
+/**
+ * V8 有些 JSON.parse 错误只给 "Unexpected token ',' ... is not valid JSON"，
+ * 既不带 position 也不带 line/column。这时用极简词法扫描找第一个明显非法的
+ * token（缺值、尾逗号、未闭合），让浏览器预览也能定位。仅开发态兜底，
+ * 生产环境的精确定位由 Rust serde_json 负责。
+ */
+function fallbackJsonErrorPos(text: string) {
+  let inString = false;
+  let escaped = false;
+  let depth = 0;
+  let prev = "";
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"') {
+      inString = true;
+      prev = c;
+      continue;
+    }
+    if (/\s/.test(c)) continue;
+    if ((c === "," || c === "}" || c === "]") && (prev === ":" || prev === ",")) {
+      return offsetToLineCol(text, i);
+    }
+    if (c === "{" || c === "[") depth++;
+    else if (c === "}" || c === "]") depth--;
+    prev = c;
+  }
+  return inString || depth > 0
+    ? offsetToLineCol(text, text.length)
+    : { line: 1, column: 1 };
+}
+
 export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
   const str = (k: string) => String(a[k] ?? "");
 
@@ -446,8 +489,9 @@ export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
     }
 
     case "json_format": {
+      const text = str("text");
       try {
-        const parsed = JSON.parse(str("text"));
+        const parsed = JSON.parse(text);
         // 和 Rust 侧 json::expand_value 保持一致：只展开本身是对象 / 数组的
         // 字符串，标量字符串（"123" "true" 等）保留。
         // 注意：这是浏览器预览用的假后端，走 JS 的 number，超过 2^53 的雪花 ID
@@ -474,7 +518,17 @@ export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
         const v = a.expandStrings ? expandValue(parsed) : parsed;
         return a.minify ? JSON.stringify(v) : JSON.stringify(v, null, Number(a.indent ?? 2));
       } catch (e) {
-        throw new Error(`JSON 语法错误：${(e as Error).message}`);
+        // 和 Rust 侧 syntax_error 对齐：抛出的 message 是 {message,line,column}
+        // 的 JSON 字符串，前端 normalizeError 会解析出来做错误位置高亮。
+        const msg = (e as Error).message;
+        const lc = /line (\d+) column (\d+)/.exec(msg);
+        const pos = /position (\d+)/.exec(msg);
+        const where = lc
+          ? { line: Number(lc[1]), column: Number(lc[2]) }
+          : pos
+            ? offsetToLineCol(text, Number(pos[1]))
+            : fallbackJsonErrorPos(text);
+        throw new Error(JSON.stringify({ message: `JSON 语法错误：${msg}`, ...where }));
       }
     }
 
