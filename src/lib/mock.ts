@@ -237,10 +237,36 @@ function simpleJsFormat(src: string, indent: number): string {
   return out.replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
 }
 
+/** 与 Rust 侧一致：把顶层换行当字段分隔符，引号内的换行保留 */
+function normalizeKvNewlines(input: string): string {
+  let out = "";
+  let quote: string | null = null;
+  let escaped = false;
+  for (const c of input) {
+    if (quote) {
+      out += c;
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === quote) quote = null;
+      continue;
+    }
+    if (c === '"' || c === "'") {
+      quote = c;
+      out += c;
+    } else if (c === "\n" || c === "\r") {
+      const t = out.trimEnd();
+      if (!t.endsWith(",") && !t.endsWith("{")) out += ",";
+    } else {
+      out += c;
+    }
+  }
+  return out;
+}
+
 function mockKv(input: string): { tree: string; json: string } {
   const s = input.trim();
   if (!s) throw new Error("没有内容可解析");
-  const src = s.startsWith("{") ? s : `{${s}}`;
+  const src = normalizeKvNewlines(s.startsWith("{") ? s : `{${s}}`);
   let i = 0;
   const ws = () => {
     while (i < src.length && /\s/.test(src[i])) i++;

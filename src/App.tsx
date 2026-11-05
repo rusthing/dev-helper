@@ -15,29 +15,21 @@ import {
 } from "./lib/theme";
 import { loadFavs, saveFavs } from "./lib/store";
 import { IS_TAURI } from "./lib/api";
-import Formatter from "./pages/Formatter";
-import Converter from "./pages/Converter";
-import Cron from "./pages/Cron";
-import Jwt from "./pages/Jwt";
+import Toolbox from "./pages/Toolbox";
 import Hash from "./pages/Hash";
 import Password from "./pages/Password";
 import Uuid from "./pages/Uuid";
 import Qrcode from "./pages/Qrcode";
-import KvJson from "./pages/KvJson";
 import Regex from "./pages/Regex";
 import Diff from "./pages/Diff";
 import Text from "./pages/Text";
 
 const PAGES: Record<string, ComponentType> = {
-  formatter: Formatter,
-  converter: Converter,
-  cron: Cron,
-  jwt: Jwt,
+  toolbox: Toolbox,
   hash: Hash,
   password: Password,
   uuid: Uuid,
   qrcode: Qrcode,
-  kvjson: KvJson,
   regex: Regex,
   diff: Diff,
   text: Text,
@@ -45,7 +37,7 @@ const PAGES: Record<string, ComponentType> = {
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadTheme);
-  const [active, setActive] = useState("formatter");
+  const [active, setActive] = useState("toolbox");
   const [favorites, setFavorites] = useState<string[]>(loadFavs);
 
   useEffect(() => {

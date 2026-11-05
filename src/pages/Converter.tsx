@@ -5,27 +5,28 @@ import { CopyButton } from "../components/CopyButton";
 import { Segmented } from "../components/Segmented";
 import { Tabs, type TabItem } from "../components/Tabs";
 import { call } from "../lib/api";
-import type { ColorInfo, TsResult } from "../lib/types";
+import { useTabUsage } from "../lib/tabUsage";
+import type { TsResult } from "../lib/types";
 
 type TabId =
+  | "timestamp"
   | "base64"
   | "url"
-  | "timestamp"
   | "radix"
   | "jy"
   | "jx"
-  | "color"
+  | "kv"
   | "unicode"
   | "rmb";
 
 const TABS: TabItem<TabId>[] = [
+  { id: "timestamp", label: "时间戳" },
   { id: "base64", label: "Base64" },
   { id: "url", label: "URL" },
-  { id: "timestamp", label: "时间戳" },
   { id: "radix", label: "进制" },
   { id: "jy", label: "JSON ↔ YAML" },
   { id: "jx", label: "JSON ↔ XML" },
-  { id: "color", label: "颜色" },
+  { id: "kv", label: "键值 → JSON" },
   { id: "unicode", label: "Unicode" },
   { id: "rmb", label: "人民币大写" },
 ];
@@ -310,23 +311,17 @@ function JsonXmlTab() {
   );
 }
 
-function ColorTab() {
+function KvTab() {
   return (
     <ConvertPanel
-      sample="#5b6cff"
-      placeholder="#rgb / #rrggbb / #rrggbbaa / rgb() / hsl()"
-      hint="支持 HEX / RGB / HSL 双向解析，输出 HEX、HEX8、RGB(A) 与 HSL。"
-      rows={3}
+      sample={"id=1001\nname=Ada\nactive=true\nnote=null\nprofile={lang=ts, level=3}"}
+      placeholder="支持 key=value、key: value，换行或逗号分隔，也支持嵌套 { }"
+      hint="值会自动识别数字 / 布尔 / null；超过 2^53 的整数按字符串输出，避免丢精度。"
+      rows={8}
+      runLabel="转 JSON"
       run={async (input) => {
-        const c = await call<ColorInfo>("color_parse", { input });
-        if (c.error) throw c.error;
-        return [
-          `HEX: ${c.hex}`,
-          `HEX8: ${c.hex8}`,
-          `RGB: ${c.rgb}`,
-          `HSL: ${c.hsl}`,
-          `分量: r=${c.r} g=${c.g} b=${c.b} a=${c.a}`,
-        ].join("\n");
+        const r = await call<{ tree: string; json: string }>("kv_to_json", { input });
+        return `缩进视图\n${r.tree}\nJSON\n${r.json}`;
       }}
     />
   );
@@ -372,19 +367,25 @@ function RmbTab() {
 }
 
 export default function Converter() {
-  const [active, setActive] = useState<TabId>("base64");
+  const [active, setActive] = useState<TabId>("timestamp");
+  const { items, record } = useTabUsage("converter", TABS);
+
+  function select(id: TabId) {
+    setActive(id);
+    record(id);
+  }
 
   return (
     <>
-      <Tabs value={active} items={TABS} onChange={setActive} />
+      <Tabs value={active} items={items} onChange={select} />
+      <div hidden={active !== "timestamp"}>
+        <TimestampTab />
+      </div>
       <div hidden={active !== "base64"}>
         <Base64Tab />
       </div>
       <div hidden={active !== "url"}>
         <UrlTab />
-      </div>
-      <div hidden={active !== "timestamp"}>
-        <TimestampTab />
       </div>
       <div hidden={active !== "radix"}>
         <RadixTab />
@@ -395,8 +396,8 @@ export default function Converter() {
       <div hidden={active !== "jx"}>
         <JsonXmlTab />
       </div>
-      <div hidden={active !== "color"}>
-        <ColorTab />
+      <div hidden={active !== "kv"}>
+        <KvTab />
       </div>
       <div hidden={active !== "unicode"}>
         <UnicodeTab />

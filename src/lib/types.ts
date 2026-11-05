@@ -46,3 +46,21 @@ export interface CronInfo {
   description: string;
 }
 
+export interface JwtParts {
+  header: string;
+  payload: string;
+  signature: string;
+  alg: string;
+  error: string | null;
+}
+
+export interface UrlParts {
+  scheme: string;
+  host: string;
+  port: string;
+  path: string;
+  fragment: string;
+  query: [string, string][];
+  error: string | null;
+}
+

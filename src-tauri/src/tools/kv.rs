@@ -283,10 +283,45 @@ fn scalar_text(v: &Value) -> String {
     }
 }
 
+/// 把换行当作字段分隔符，兼容「一行一个 key=value」的写法。
+/// 引号里的换行原样保留；`{` 后和已有逗号后的换行不重复补逗号。
+fn normalize_separators(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    let mut quote: Option<char> = None;
+    let mut escaped = false;
+    for c in s.chars() {
+        if let Some(q) = quote {
+            out.push(c);
+            if escaped {
+                escaped = false;
+            } else if c == '\\' {
+                escaped = true;
+            } else if c == q {
+                quote = None;
+            }
+            continue;
+        }
+        match c {
+            '"' | '\'' => {
+                quote = Some(c);
+                out.push(c);
+            }
+            '\n' | '\r' => {
+                let t = out.trim_end();
+                if !t.ends_with(',') && !t.ends_with('{') {
+                    out.push(',');
+                }
+            }
+            _ => out.push(c),
+        }
+    }
+    out
+}
+
 /// # 键值文本转 JSON
 ///
 /// ## 参数
-/// - `input`：裸键值文本，可带外层花括号，也接受 `a=1, b=2` 这样不带括号的片段
+/// - `input`：裸键值文本，可带外层花括号；支持 `a=1, b=2`、`a: 1`，以及一行一个字段的写法
 ///
 /// ## 返回
 /// - `tree`：缩进树，键值用 `=` 连接，一层两空格
@@ -307,6 +342,7 @@ pub fn kv_to_json(input: String) -> Result<KvResult, String> {
     } else {
         format!("{{{trimmed}}}")
     };
+    let src = normalize_separators(&src);
 
     let mut p = Parser::new(&src);
     let v = p.parse_value().map_err(|e| format!("{e}（第 {} 个字符附近）", p.i))?;
@@ -382,6 +418,32 @@ mod tests {
         let r = kv_to_json("a=1, b=2".into()).unwrap();
         assert!(r.json.contains("\"a\": 1"));
         assert!(r.json.contains("\"b\": 2"));
+    }
+
+    #[test]
+    fn multiline_pairs_are_parsed() {
+        let r = kv_to_json("id=1001\nname=Ada\nactive=true\nnote=null".into()).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&r.json).unwrap();
+        assert_eq!(v["id"], 1001);
+        assert_eq!(v["name"], "Ada");
+        assert_eq!(v["active"], true);
+        assert!(v["note"].is_null());
+    }
+
+    #[test]
+    fn colon_style_with_newlines_is_parsed() {
+        let r = kv_to_json("name: Ada\nrole: admin".into()).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&r.json).unwrap();
+        assert_eq!(v["name"], "Ada");
+        assert_eq!(v["role"], "admin");
+    }
+
+    #[test]
+    fn multiline_nested_object_keeps_structure() {
+        let r = kv_to_json("id=1\nprofile={\n  lang: ts\n  level: 3\n}".into()).unwrap();
+        let v: serde_json::Value = serde_json::from_str(&r.json).unwrap();
+        assert_eq!(v["profile"]["lang"], "ts");
+        assert_eq!(v["profile"]["level"], 3);
     }
 
     #[test]

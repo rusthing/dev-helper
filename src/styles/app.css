@@ -1185,6 +1185,79 @@ html.theme-fading *::after {
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
 }
 
+/* 工具箱顶部的「格式化 / 转换 / 解析」分组条，比组内 Tab 再重一档 */
+.group-tabs .tabs {
+  margin-bottom: 10px;
+  background: var(--surface);
+}
+
+.group-tabs .tab {
+  height: 34px;
+  padding: 0 16px;
+  font-size: var(--fs-base);
+}
+
+/* ---------- 解析器结果网格 ---------- */
+.claim-grid {
+  display: grid;
+  grid-template-columns: minmax(96px, 180px) 72px minmax(0, 1fr) 32px;
+  align-items: start;
+  column-gap: 14px;
+  row-gap: 10px;
+}
+
+.claim-grid .claim-head {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.claim-grid .claim-key {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text-soft);
+  overflow-wrap: anywhere;
+}
+
+.claim-grid .claim-type {
+  justify-self: start;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  line-height: 1.4;
+}
+
+.claim-grid .claim-value {
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  color: var(--text);
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.claim-time {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-size: var(--fs-xs);
+  color: var(--text-muted);
+}
+
+.claim-note {
+  margin: -4px 0 14px;
+  padding: 9px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+}
+
 /* ---------- 格式化 / 转换面板 ---------- */
 .option-row {
   display: flex;

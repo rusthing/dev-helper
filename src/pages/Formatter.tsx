@@ -5,6 +5,7 @@ import { CopyButton } from "../components/CopyButton";
 import { Segmented } from "../components/Segmented";
 import { Tabs, type TabItem } from "../components/Tabs";
 import { call } from "../lib/api";
+import { useTabUsage } from "../lib/tabUsage";
 
 type TabId =
   | "json"
@@ -432,10 +433,16 @@ function UrlTab() {
 
 export default function Formatter() {
   const [active, setActive] = useState<TabId>("json");
+  const { items, record } = useTabUsage("formatter", TABS);
+
+  function select(id: TabId) {
+    setActive(id);
+    record(id);
+  }
 
   return (
     <>
-      <Tabs value={active} items={TABS} onChange={setActive} />
+      <Tabs value={active} items={items} onChange={select} />
       <div hidden={active !== "json"}>
         <JsonTab />
       </div>
