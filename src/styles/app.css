@@ -1145,3 +1145,192 @@ html.theme-fading *::after {
   font-weight: 500;
   opacity: 0.85;
 }
+
+/* ---------- 菜单内 Tab ---------- */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+
+.tab {
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: var(--fs-sm);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--text);
+  background: var(--surface);
+}
+
+.tab.on {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 600;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
+}
+
+/* ---------- 格式化 / 转换面板 ---------- */
+.option-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  margin-top: 12px;
+}
+
+.option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+}
+
+.panel-actions {
+  margin-top: 12px;
+}
+
+.panel-hint {
+  margin-left: auto;
+  max-width: 48%;
+  text-align: right;
+  line-height: 1.5;
+}
+
+.code-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+}
+
+/* ---------- Cron ---------- */
+.cron-desc {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.6;
+  color: var(--text);
+  padding: 6px 0 4px;
+}
+
+.cron-fields {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.7fr) 120px minmax(220px, 1.8fr) minmax(84px, 0.6fr);
+  gap: 10px 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.cron-field {
+  display: contents;
+}
+
+.cron-field__head {
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding-bottom: 2px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cron-field__name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cron-field__label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.cron-field__range {
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.cron-field__value {
+  min-width: 0;
+}
+
+.cron-range,
+.cron-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.cron-range .input,
+.cron-step .input {
+  min-width: 0;
+}
+
+.cron-field__token {
+  display: block;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-soft);
+  font-family: var(--font-mono);
+  font-size: var(--fs-sm);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preset-row {
+  margin-top: 12px;
+}
+
+.cron-help {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--text-soft);
+  font-size: var(--fs-sm);
+  line-height: 1.7;
+}
+
+@media (max-width: 720px) {
+  .cron-fields {
+    grid-template-columns: minmax(84px, 1fr) 96px minmax(150px, 1.6fr) 68px;
+    gap: 8px;
+  }
+
+  .cron-field__range {
+    display: none;
+  }
+
+  .panel-hint {
+    max-width: 100%;
+    margin-left: 0;
+    text-align: left;
+    flex-basis: 100%;
+  }
+}

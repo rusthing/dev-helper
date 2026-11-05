@@ -62,6 +62,21 @@ pub fn run() {
             // 颜色
             tools::color::color_parse,
             tools::color::contrast_ratio,
+            // 格式化器
+            tools::format_suite::text_format,
+            tools::format_suite::url_params_format,
+            // 转换器
+            tools::convert::radix_convert,
+            tools::convert::json_to_yaml,
+            tools::convert::yaml_to_json,
+            tools::convert::json_to_xml,
+            tools::convert::xml_to_json,
+            tools::convert::unicode_escape,
+            tools::convert::unicode_unescape,
+            tools::convert::rmb_to_upper,
+            tools::convert::rmb_from_upper,
+            // Cron
+            tools::cron::cron_explain,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

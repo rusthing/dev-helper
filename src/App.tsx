@@ -15,36 +15,28 @@ import {
 } from "./lib/theme";
 import { loadFavs, saveFavs } from "./lib/store";
 import { IS_TAURI } from "./lib/api";
-import Timestamp from "./pages/Timestamp";
-import Color from "./pages/Color";
-import Base64 from "./pages/Base64";
-import Url from "./pages/Url";
+import Formatter from "./pages/Formatter";
+import Converter from "./pages/Converter";
+import Cron from "./pages/Cron";
 import Jwt from "./pages/Jwt";
 import Hash from "./pages/Hash";
 import Password from "./pages/Password";
 import Uuid from "./pages/Uuid";
 import Qrcode from "./pages/Qrcode";
-import Json from "./pages/Json";
-import Format from "./pages/Format";
-import JsFormat from "./pages/JsFormat";
 import KvJson from "./pages/KvJson";
 import Regex from "./pages/Regex";
 import Diff from "./pages/Diff";
 import Text from "./pages/Text";
 
 const PAGES: Record<string, ComponentType> = {
-  timestamp: Timestamp,
-  color: Color,
-  base64: Base64,
-  url: Url,
+  formatter: Formatter,
+  converter: Converter,
+  cron: Cron,
   jwt: Jwt,
   hash: Hash,
   password: Password,
   uuid: Uuid,
   qrcode: Qrcode,
-  json: Json,
-  format: Format,
-  jsformat: JsFormat,
   kvjson: KvJson,
   regex: Regex,
   diff: Diff,
@@ -53,7 +45,7 @@ const PAGES: Record<string, ComponentType> = {
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadTheme);
-  const [active, setActive] = useState("timestamp");
+  const [active, setActive] = useState("formatter");
   const [favorites, setFavorites] = useState<string[]>(loadFavs);
 
   useEffect(() => {

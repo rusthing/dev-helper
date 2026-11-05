@@ -27,3 +27,22 @@ export interface HashResult {
   algo: string;
   output: string;
 }
+
+export interface ColorInfo {
+  hex: string;
+  hex8: string;
+  rgb: string;
+  hsl: string;
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+  error: string | null;
+}
+
+export interface CronInfo {
+  normalized: string;
+  fields: number;
+  description: string;
+}
+

@@ -36,5 +36,7 @@ regex = "1"
 similar = "2"
 sqlformat = "0.5"
 dprint-plugin-typescript = "0.96"
+serde_yaml = "0.9"
+quick-xml = "0.37"
 qrcode = { version = "0.14", default-features = false, features = ["svg", "image"] }
 image = { version = "0.25", default-features = false, features = ["png"] }

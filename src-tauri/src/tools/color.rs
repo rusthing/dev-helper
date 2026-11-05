@@ -86,6 +86,67 @@ fn parse_rgb(s: &str) -> Option<(u8, u8, u8, u8)> {
     Some((r, g, b, a))
 }
 
+fn hsl_to_rgb(h: f64, s: f64, l: f64) -> (u8, u8, u8) {
+    let h = h.rem_euclid(360.0);
+    let s = (s / 100.0).clamp(0.0, 1.0);
+    let l = (l / 100.0).clamp(0.0, 1.0);
+    let c = (1.0 - (2.0 * l - 1.0).abs()) * s;
+    let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
+    let m = l - c / 2.0;
+    let (r, g, b) = if h < 60.0 {
+        (c, x, 0.0)
+    } else if h < 120.0 {
+        (x, c, 0.0)
+    } else if h < 180.0 {
+        (0.0, c, x)
+    } else if h < 240.0 {
+        (0.0, x, c)
+    } else if h < 300.0 {
+        (x, 0.0, c)
+    } else {
+        (c, 0.0, x)
+    };
+    (
+        ((r + m) * 255.0).round() as u8,
+        ((g + m) * 255.0).round() as u8,
+        ((b + m) * 255.0).round() as u8,
+    )
+}
+
+fn parse_hsl(s: &str) -> Option<(u8, u8, u8, u8)> {
+    let inner = s
+        .trim()
+        .strip_prefix("hsl(")
+        .or_else(|| s.trim().strip_prefix("hsla("))?
+        .strip_suffix(')')?;
+    let parts: Vec<&str> = inner.split(',').map(str::trim).collect();
+    if parts.len() < 3 {
+        return None;
+    }
+    let h = parts[0]
+        .trim_end_matches("deg")
+        .parse::<f64>()
+        .ok()?;
+    let sat = parts[1].trim_end_matches('%').parse::<f64>().ok()?;
+    let l = parts[2].trim_end_matches('%').parse::<f64>().ok()?;
+    if !(0.0..=100.0).contains(&sat) || !(0.0..=100.0).contains(&l) {
+        return None;
+    }
+    let a = parts
+        .get(3)
+        .and_then(|v| {
+            if let Some(p) = v.strip_suffix('%') {
+                p.parse::<f64>().ok().map(|p| p / 100.0)
+            } else {
+                v.parse::<f64>().ok()
+            }
+        })
+        .map(|v| (v.clamp(0.0, 1.0) * 255.0).round() as u8)
+        .unwrap_or(255);
+    let (r, g, b) = hsl_to_rgb(h, sat, l);
+    Some((r, g, b, a))
+}
+
 fn rgb_to_hsl(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
     let (rf, gf, bf) = (r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0);
     let max = rf.max(gf).max(bf);
@@ -114,10 +175,12 @@ fn rgb_to_hsl(r: u8, g: u8, b: u8) -> (f64, f64, f64) {
 pub fn color_parse(input: String) -> ColorInfo {
     let s = input.trim();
     if s.is_empty() {
-        return err("请输入颜色值，如 #5b6cff、rgb(91,108,255)");
+        return err("请输入颜色值，如 #5b6cff、rgb(91,108,255)、hsl(230, 100%, 68%)");
     }
     let parsed = if s.starts_with("rgb") {
         parse_rgb(s)
+    } else if s.starts_with("hsl") {
+        parse_hsl(s)
     } else {
         parse_hex(s)
     };

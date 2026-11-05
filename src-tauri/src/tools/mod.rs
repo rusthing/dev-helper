@@ -1,7 +1,10 @@
 pub mod base64;
 pub mod color;
+pub mod convert;
+pub mod cron;
 pub mod diff;
 pub mod format;
+pub mod format_suite;
 pub mod hash;
 pub mod json;
 pub mod js_format;

@@ -380,11 +380,18 @@ export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
     case "js_format":
       return simpleJsFormat(str("text"), Number(a.indent ?? 2));
 
-    case "base64_encode":
-      return btoa(unescape(encodeURIComponent(str("text"))));
+    case "base64_encode": {
+      const b64 = btoa(unescape(encodeURIComponent(str("text"))));
+      let out = a.urlSafe ? b64.replace(/\+/g, "-").replace(/\//g, "_") : b64;
+      if (a.noPad) out = out.replace(/=+$/, "");
+      return out;
+    }
     case "base64_decode":
       try {
-        return decodeURIComponent(escape(atob(str("text").replace(/\s/g, ""))));
+        let s = str("text").replace(/\s/g, "");
+        if (a.urlSafe) s = s.replace(/-/g, "+").replace(/_/g, "/");
+        s = s.padEnd(Math.ceil(s.length / 4) * 4, "=");
+        return decodeURIComponent(escape(atob(s)));
       } catch {
         throw new Error("Base64 解码失败：输入不是合法的 Base64");
       }
@@ -676,7 +683,606 @@ export function mockInvoke(cmd: string, a: Record<string, unknown>): unknown {
     case "json_size":
       return str("text").length;
 
+    // 以下为新增菜单的浏览器预览实现；真实算法与校验都在 Rust 侧
+    case "text_format":
+      return mockTextFormat(str("kind"), str("text"), Number(a.indent ?? 2));
+
+    case "url_params_format":
+      return mockUrlParams(str("text"), Boolean(a.sort));
+
+    case "radix_convert":
+      return mockRadix(str("value"), Number(a.from ?? 10));
+
+    case "json_to_yaml":
+      return mockJsonToYaml(str("text"));
+
+    case "yaml_to_json":
+      throw new Error("浏览器预览不支持 YAML 解析，请使用桌面应用");
+
+    case "json_to_xml":
+      return mockJsonToXml(str("text"), Number(a.indent ?? 2));
+
+    case "xml_to_json":
+      return mockXmlToJson(str("text"));
+
+    case "unicode_escape":
+      return mockUnicodeEscape(str("text"));
+
+    case "unicode_unescape":
+      return mockUnicodeUnescape(str("text"));
+
+    case "rmb_to_upper":
+      return mockRmbUpper(str("amount"));
+
+    case "rmb_from_upper":
+      return mockRmbFromUpper(str("text"));
+
+    case "cron_explain":
+      return mockCronExplain(str("expr"));
+
     default:
       return null;
   }
 }
+
+// ---------------------------------------------------------------------------
+// 浏览器预览用的轻量实现（只求布局和交互可验证，不替代 Rust 业务逻辑）
+// ---------------------------------------------------------------------------
+
+function mockTextFormat(kind: string, text: string, indent: number): string {
+  const pad = " ".repeat(Math.max(1, Math.min(8, indent)));
+  const src = text.trim();
+  if (!src) return "";
+  if (kind === "markdown") {
+    const lines = src.replace(/\r\n?/g, "\n").split("\n");
+    const out: string[] = [];
+    let blank = 0;
+    for (const line of lines) {
+      const t = line.replace(/\s+$/, "");
+      if (!t) {
+        if (++blank <= 1) out.push("");
+        continue;
+      }
+      blank = 0;
+      out.push(t.replace(/^(#{1,6})([^\s#])/, "$1 $2"));
+    }
+    return out.join("\n").replace(/\n+$/, "") + "\n";
+  }
+  if (kind === "css" || kind === "scss") {
+    const oneLine = src
+      .replace(/\s+/g, " ")
+      .replace(/\s*{\s*/g, " {\n")
+      .replace(/;\s*/g, ";\n")
+      .replace(/\s*}\s*/g, "\n}\n");
+    let depth = 0;
+    return oneLine
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => {
+        if (l.startsWith("}")) depth = Math.max(0, depth - 1);
+        const v = pad.repeat(depth) + l;
+        if (l.endsWith("{")) depth++;
+        return v;
+      })
+      .join("\n");
+  }
+  if (kind === "xml" || kind === "html") {
+    const withBreaks = src
+      .replace(/>\s*</g, ">\n<")
+      .replace(/\s+/g, " ");
+    let depth = 0;
+    const voids = new Set([
+      "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta",
+      "param", "source", "track", "wbr",
+    ]);
+    return withBreaks
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((l) => {
+        const closing = /^<\//.test(l);
+        const self = /\/>$/.test(l) || /^<(!|\?)/.test(l);
+        const name = l.replace(/^<\/?/, "").split(/[\s>/]/)[0].toLowerCase();
+        if (closing) depth = Math.max(0, depth - 1);
+        const v = pad.repeat(depth) + l;
+        if (!closing && !self && !(kind === "html" && voids.has(name))) depth++;
+        return v;
+      })
+      .join("\n");
+  }
+  if (kind === "yaml") {
+    throw new Error("浏览器预览不支持 YAML 格式化，请使用桌面应用");
+  }
+  throw new Error(`不支持的格式：${kind}`);
+}
+
+function mockUrlParams(text: string, sort: boolean): string {
+  let s = text.trim().split("#")[0];
+  const q = s.indexOf("?");
+  if (q >= 0) s = s.slice(q + 1);
+  s = s.replace(/^\?/, "");
+  if (!s) return "";
+  const params = s
+    .split("&")
+    .filter(Boolean)
+    .map((pair) => {
+      const [k, v = ""] = pair.split("=");
+      const dec = (x: string) => {
+        try {
+          return decodeURIComponent(x.replace(/\+/g, " "));
+        } catch {
+          return x;
+        }
+      };
+      return [dec(k), dec(v)] as [string, string];
+    });
+  if (sort) params.sort((x, y) => x[0].localeCompare(y[0]));
+  const width = Math.max(...params.map((p) => [...p[0]].length));
+  return params
+    .map(([k, v]) => k + " ".repeat(width - [...k].length) + " = " + v)
+    .join("\n");
+}
+
+function mockRadix(value: string, from: number): Record<string, string> {
+  if (![2, 8, 10, 16].includes(from)) throw new Error("来源进制只能是 2 / 8 / 10 / 16");
+  let s = value.trim();
+  const neg = s.startsWith("-");
+  if (neg) s = s.slice(1);
+  const lower = s.toLowerCase();
+  if (from === 2 && lower.startsWith("0b")) s = s.slice(2);
+  if (from === 8 && lower.startsWith("0o")) s = s.slice(2);
+  if (from === 16 && lower.startsWith("0x")) s = s.slice(2);
+  if (!s) throw new Error("请输入要转换的数字");
+  const digits = "0123456789abcdef".slice(0, from);
+  const bad = [...s.toLowerCase()].find((c) => !digits.includes(c));
+  if (bad) throw new Error("输入包含当前进制不允许的字符");
+  let n = 0n;
+  for (const c of s.toLowerCase()) n = n * BigInt(from) + BigInt(digits.indexOf(c));
+  if (neg) n = -n;
+  const abs = n < 0n ? -n : n;
+  const sign = n < 0n ? "-" : "";
+  return {
+    decimal: n.toString(),
+    binary: `${sign}0b${abs.toString(2)}`,
+    octal: `${sign}0o${abs.toString(8)}`,
+    hex: `${sign}0x${abs.toString(16)}`,
+  };
+}
+
+function mockJsonToYaml(text: string): string {
+  const v = JSON.parse(text);
+  const scalar = (x: unknown): string => {
+    if (x === null) return "null";
+    if (typeof x === "string") {
+      return /[:#\-\n]/.test(x) || x === "" ? JSON.stringify(x) : x;
+    }
+    return String(x);
+  };
+  const dump = (x: unknown, depth: number): string => {
+    const pad = "  ".repeat(depth);
+    if (Array.isArray(x)) {
+      if (!x.length) return " []";
+      return (
+        "\n" +
+        x
+          .map((item) =>
+            `${pad}- ${
+              item && typeof item === "object"
+                ? dump(item, 0).replace(/^\n?/, "").trimStart()
+                : scalar(item)
+            }`,
+          )
+          .join("\n")
+      );
+    }
+    if (x && typeof x === "object") {
+      const keys = Object.keys(x as Record<string, unknown>);
+      if (!keys.length) return " {}";
+      return (
+        "\n" +
+        keys
+          .map((k) => {
+            const val = (x as Record<string, unknown>)[k];
+            if (val && typeof val === "object") {
+              return `${pad}${k}:${dump(val, depth + 1)}`;
+            }
+            return `${pad}${k}: ${scalar(val)}`;
+          })
+          .join("\n")
+      );
+    }
+    return " " + scalar(x);
+  };
+  return (dump(v, 0).trimStart() || "null") + "\n";
+}
+
+function mockJsonToXml(text: string, indent: number): string {
+  const v = JSON.parse(text);
+  const pad = " ".repeat(indent);
+  const esc = (s: string, attr = false) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(attr ? /"/g : /$^/, "&quot;")
+      .replace(attr ? /'/g : /$^/, "&apos;");
+  const nameOk = (n: string) => /^[A-Za-z_:][\w.:-]*$/.test(n);
+  const scalar = (x: unknown) =>
+    x === null ? "" : typeof x === "string" ? x : String(x);
+  const write = (name: string, x: unknown, depth: number): string => {
+    if (!nameOk(name)) throw new Error(`键「${name}」不是合法的 XML 标签名`);
+    const p = pad.repeat(depth);
+    if (Array.isArray(x)) {
+      if (!x.length) return `${p}<${name}/>`;
+      return x.map((it) => write(name, it, depth)).join("\n");
+    }
+    if (x && typeof x === "object") {
+      const attrs: string[] = [];
+      let textNode: string | undefined;
+      const children: [string, unknown][] = [];
+      for (const [k, val] of Object.entries(x as Record<string, unknown>)) {
+        if (k.startsWith("@")) attrs.push(` ${k.slice(1)}="${esc(scalar(val), true)}"`);
+        else if (k === "#text") textNode = scalar(val);
+        else children.push([k, val]);
+      }
+      if (!children.length) {
+        const body = textNode ?? "";
+        return body
+          ? `${p}<${name}${attrs.join("")}>${esc(body)}</${name}>`
+          : `${p}<${name}${attrs.join("")}/>`;
+      }
+      const lines = [`${p}<${name}${attrs.join("")}>`];
+      if (textNode) lines.push(`${p}${pad}${esc(textNode)}`);
+      for (const [k, val] of children) lines.push(write(k, val, depth + 1));
+      lines.push(`${p}</${name}>`);
+      return lines.join("\n");
+    }
+    return `${p}<${name}>${esc(scalar(x))}</${name}>`;
+  };
+  if (v && typeof v === "object" && !Array.isArray(v) && Object.keys(v).length === 1) {
+    const [k, val] = Object.entries(v as Record<string, unknown>)[0];
+    return write(k, val, 0);
+  }
+  if (Array.isArray(v)) return v.map((it) => write("item", it, 0)).join("\n");
+  return write("root", v, 0);
+}
+
+function mockXmlToJson(text: string): string {
+  const doc = new DOMParser().parseFromString(text, "application/xml");
+  if (doc.querySelector("parsererror")) throw new Error("XML 解析失败，请检查标签闭合");
+  const root = doc.documentElement;
+  const toJson = (el: Element): unknown => {
+    const attrs = [...el.attributes];
+    const children = [...el.children];
+    const textValue = [...el.childNodes]
+      .filter((n) => n.nodeType === 3 || n.nodeType === 4)
+      .map((n) => n.nodeValue ?? "")
+      .join("")
+      .trim();
+    if (!attrs.length && !children.length) return textValue;
+    const obj: Record<string, unknown> = {};
+    for (const at of attrs) obj[`@${at.name}`] = at.value;
+    if (textValue) obj["#text"] = textValue;
+    for (const child of children) {
+      const val = toJson(child);
+      if (child.tagName in obj) {
+        const old = obj[child.tagName];
+        obj[child.tagName] = Array.isArray(old) ? [...old, val] : [old, val];
+      } else {
+        obj[child.tagName] = val;
+      }
+    }
+    return obj;
+  };
+  return JSON.stringify(toJson(root), null, 2);
+}
+
+function mockUnicodeEscape(text: string): string {
+  const hex4 = (n: number) => n.toString(16).toUpperCase().padStart(4, "0");
+  let out = "";
+  for (const c of text) {
+    const cp = c.codePointAt(0) ?? 0;
+    if (cp <= 0x7f) out += c;
+    else if (cp <= 0xffff) out += `\\u${hex4(cp)}`;
+    else {
+      const v = cp - 0x10000;
+      out += `\\u${hex4(0xd800 + (v >> 10))}\\u${hex4(0xdc00 + (v & 0x3ff))}`;
+    }
+  }
+  return out;
+}
+
+function mockUnicodeUnescape(text: string): string {
+  return text.replace(/\\u\{([0-9a-fA-F]+)\}|\\u([0-9a-fA-F]{4})/g, (m: string, braced: string | undefined, four: string | undefined) => {
+    const cp = Number.parseInt(braced ?? four ?? "", 16);
+    if (cp >= 0xd800 && cp <= 0xdbff) return m;
+    try {
+      return String.fromCodePoint(cp);
+    } catch {
+      return m;
+    }
+  }).replace(/([\ud800-\udbff])([\udc00-\udfff])/g, (_: string, hi: string, lo: string) =>
+    String.fromCodePoint(0x10000 + ((hi.charCodeAt(0) - 0xd800) << 10) + (lo.charCodeAt(0) - 0xdc00)),
+  );
+}
+
+const MOCK_RMB_DIGITS = ["零", "壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖"];
+const MOCK_RMB_UNITS = ["", "拾", "佰", "仟"];
+const MOCK_RMB_GROUPS = ["", "万", "亿"];
+
+function mockRmbGroup(n: number): string {
+  let out = "";
+  let zero = false;
+  for (let pos = 3; pos >= 0; pos--) {
+    const d = Math.floor(n / 10 ** pos) % 10;
+    if (d === 0) {
+      if (out) zero = true;
+    } else {
+      if (zero) {
+        out += "零";
+        zero = false;
+      }
+      out += MOCK_RMB_DIGITS[d] + MOCK_RMB_UNITS[pos];
+    }
+  }
+  return out;
+}
+
+function mockRmbInteger(n: number): string {
+  if (n === 0) return "零";
+  const groups = [n % 10000, Math.floor((n / 10000) % 10000), Math.floor((n / 1e8) % 10000)];
+  let out = "";
+  let pending = false;
+  for (let idx = 2; idx >= 0; idx--) {
+    const g = groups[idx];
+    if (!g) {
+      if (out) pending = true;
+      continue;
+    }
+    if (out && (pending || g < 1000) && !out.endsWith("零")) out += "零";
+    out += mockRmbGroup(g) + MOCK_RMB_GROUPS[idx];
+    pending = false;
+  }
+  return out;
+}
+
+function mockRmbUpper(amount: string): string {
+  const t = amount
+    .trim()
+    .replace(/^[¥￥]/, "")
+    .replace(/[,，\s]/g, "");
+  if (!t) throw new Error("请输入金额");
+  if (t.startsWith("-")) throw new Error("金额不能为负数");
+  const parts = t.split(".");
+  if (parts.length > 2) throw new Error("小数点只能出现一次");
+  const [intRaw, frac = ""] = parts;
+  if (intRaw && !/^\d+$/.test(intRaw)) throw new Error("整数部分只能是数字");
+  if (frac && !/^\d+$/.test(frac)) throw new Error("小数部分只能是数字");
+  if (frac.length > 2) throw new Error("金额最多保留两位小数（角、分）");
+  const intTrim = intRaw.replace(/^0+/, "");
+  if (intTrim.length > 12) throw new Error("金额超出支持范围（最大 9999 亿）");
+  const major = Number(intTrim || "0");
+  const jiao = Number(frac[0] ?? "0");
+  const fen = Number(frac[1] ?? "0");
+  let out = `${mockRmbInteger(major)}元`;
+  if (!jiao && !fen) out += "整";
+  else if (!jiao) out += `零${MOCK_RMB_DIGITS[fen]}分`;
+  else {
+    out += `${MOCK_RMB_DIGITS[jiao]}角`;
+    out += fen ? `${MOCK_RMB_DIGITS[fen]}分` : "整";
+  }
+  return out;
+}
+
+function mockRmbDigit(c: string): number | null {
+  const i = MOCK_RMB_DIGITS.indexOf(c);
+  if (i >= 0) return i;
+  const simple = "零一二三四五六七八九";
+  const j = simple.indexOf(c);
+  return j >= 0 ? j : null;
+}
+
+function mockRmbSection(s: string): number {
+  let total = 0;
+  let current = 0;
+  let hasDigit = false;
+  let lastUnit = 10000;
+  for (const c of s) {
+    if (c === "零") {
+      current = 0;
+      hasDigit = false;
+      continue;
+    }
+    const d = mockRmbDigit(c);
+    if (d !== null) {
+      if (hasDigit) throw new Error("数位之间缺少单位");
+      current = d;
+      hasDigit = true;
+      continue;
+    }
+    const unit = c === "拾" || c === "十" ? 10 : c === "佰" || c === "百" ? 100 : c === "仟" || c === "千" ? 1000 : 0;
+    if (!unit) throw new Error(`无法识别「${c}」`);
+    if (unit >= lastUnit) throw new Error("单位顺序不正确");
+    total += (hasDigit ? current : 1) * unit;
+    current = 0;
+    hasDigit = false;
+    lastUnit = unit;
+  }
+  return total + current;
+}
+
+function mockRmbInt(s: string): number {
+  if (!s) return 0;
+  const yi = s.indexOf("亿");
+  if (yi >= 0) return mockRmbInt(s.slice(0, yi)) * 1e8 + mockRmbInt(s.slice(yi + 1));
+  const wan = s.indexOf("万");
+  if (wan >= 0) return mockRmbInt(s.slice(0, wan)) * 1e4 + mockRmbInt(s.slice(wan + 1));
+  return mockRmbSection(s);
+}
+
+function mockRmbFromUpper(text: string): string {
+  const cleaned = text.trim().replace(/[,，\s]/g, "");
+  if (!cleaned) throw new Error("请输入中文大写金额");
+  if (cleaned.startsWith("负")) throw new Error("金额不能为负数");
+  const normalized = cleaned.replace(/圆/g, "元").replace(/正/g, "整").replace(/整+$/, "");
+  const idx = normalized.indexOf("元");
+  const intPart = idx >= 0 ? normalized.slice(0, idx) : "";
+  const decPart = idx >= 0 ? normalized.slice(idx + 1) : normalized;
+  const major = intPart ? mockRmbInt(intPart) : 0;
+  if (major > 999999999999) throw new Error("金额超出支持范围（最大 9999 亿）");
+  let jiao = 0;
+  let fen = 0;
+  let current: number | null = null;
+  for (const c of decPart) {
+    if (c === "零") {
+      current = null;
+      continue;
+    }
+    const d = mockRmbDigit(c);
+    if (d !== null) {
+      if (current !== null) throw new Error("角分数字重复");
+      current = d;
+      continue;
+    }
+    if (c === "角") {
+      jiao = current ?? 0;
+      current = null;
+    } else if (c === "分") {
+      fen = current ?? 0;
+      current = null;
+    } else {
+      throw new Error(`无法识别「${c}」`);
+    }
+  }
+  if (current !== null) throw new Error("角分缺少单位");
+  return jiao || fen ? `${major}.${jiao}${fen}` : String(major);
+}
+
+const MOCK_CRON_NAMES: Record<string, number> = {
+  JAN: 1, FEB: 2, MAR: 3, APR: 4, MAY: 5, JUN: 6, JUL: 7, AUG: 8, SEP: 9, OCT: 10, NOV: 11, DEC: 12,
+  SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6,
+};
+
+function mockCronField(
+  token: string,
+  min: number,
+  max: number,
+  label: string,
+  allowSeven = false,
+): Set<number> {
+  const out = new Set<number>();
+  const limit = allowSeven ? 7 : max;
+  for (const rawItem of token.split(",")) {
+    if (!rawItem.trim()) throw new Error(`${label}字段的列表里有空项`);
+    const [base, stepRaw] = rawItem.split("/");
+    let step = 1;
+    if (stepRaw !== undefined) {
+      if (!/^\d+$/.test(stepRaw) || Number(stepRaw) === 0) throw new Error(`${label}字段的步长必须大于 0`);
+      step = Number(stepRaw);
+    }
+    const parse = (x: string) => {
+      if (/^\d+$/.test(x.trim())) return Number(x);
+      const n = MOCK_CRON_NAMES[x.trim().toUpperCase()];
+      if (n === undefined) throw new Error(`${label}字段无法识别「${x}」`);
+      return n;
+    };
+    let start: number;
+    let end: number;
+    if (base === "*") {
+      start = min;
+      end = max;
+    } else if (base.includes("-")) {
+      const [a, b] = base.split("-");
+      start = parse(a);
+      end = parse(b);
+      if (start > end) throw new Error(`${label}字段的范围起点大于终点`);
+    } else {
+      start = parse(base);
+      end = stepRaw !== undefined ? limit : start;
+    }
+    if (start > limit || end > limit || start < min || end < min) {
+      throw new Error(`${label}字段的值超出范围 ${min}-${limit}`);
+    }
+    for (let v = start; v <= end; v += step) out.add(allowSeven && v === 7 ? 0 : v);
+  }
+  return out;
+}
+
+function mockCronExplain(expr: string): Record<string, unknown> {
+  const parts = expr.trim().split(/\s+/).filter(Boolean);
+  if (parts.length !== 5 && parts.length !== 6) {
+    throw new Error(`Cron 表达式需要 5 段（分 时 日 月 周）或 6 段（秒 分 时 日 月 周），当前是 ${parts.length} 段`);
+  }
+  const six = parts.length === 6;
+  const off = six ? 1 : 0;
+  const sec = six ? mockCronField(parts[0], 0, 59, "秒") : null;
+  const minute = mockCronField(parts[off], 0, 59, "分");
+  const hour = mockCronField(parts[off + 1], 0, 23, "时");
+  const dom = mockCronField(parts[off + 2], 1, 31, "日");
+  const month = mockCronField(parts[off + 3], 1, 12, "月");
+  const dow = mockCronField(parts[off + 4], 0, 6, "周", true);
+
+  const vals = (s: Set<number>) => [...s].sort((a, b) => a - b);
+  const join = (s: Set<number>) => vals(s).join("、");
+  const all = (s: Set<number>, min: number, max: number) => s.size >= max - min + 1;
+  const stepOf = (s: Set<number>): number | null => {
+    const v = vals(s);
+    if (v.length < 2) return null;
+    const d = v[1] - v[0];
+    return d > 0 && v.every((x, i) => i === 0 || x - v[i - 1] === d) ? d : null;
+  };
+  const WEEK = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  const weeks = () => vals(dow).map((v) => WEEK[v]).join("、");
+  const months = () => join(month);
+  const doms = () => join(dom);
+
+  let date: string;
+  const monthAll = all(month, 1, 12);
+  const domAll = all(dom, 1, 31);
+  const dowAll = dow.size === 7;
+  if (monthAll && domAll && dowAll) date = "每天";
+  else if (monthAll && domAll) date = `每${weeks()}`;
+  else if (monthAll && dowAll) date = `每月${doms()}号`;
+  else if (monthAll) date = `每月${doms()}号或每${weeks()}`;
+  else if (domAll && dowAll) date = `每年${months()}月的每一天`;
+  else if (domAll) date = `每年${months()}月的每${weeks()}`;
+  else if (dowAll) date = `每年${months()}月${doms()}号`;
+  else date = `每年${months()}月${doms()}号或每${weeks()}`;
+
+  const hourAll = all(hour, 0, 23);
+  const minAll = all(minute, 0, 59);
+  let time: string;
+  if (hourAll && minAll) {
+    if (!sec) time = "每分钟";
+    else if (all(sec, 0, 59)) time = "每秒";
+    else {
+      const st = stepOf(sec);
+      time = st ? `每 ${st} 秒` : `每分钟的第 ${join(sec)} 秒`;
+    }
+  } else if (hourAll) {
+    const st = stepOf(minute);
+    time = st ? `每 ${st} 分钟` : `每小时的第 ${join(minute)} 分钟`;
+  } else if (minAll) {
+    const st = stepOf(hour);
+    time = st ? `每 ${st} 小时` : `在 ${join(hour)} 点内每分钟`;
+  } else {
+    const h = vals(hour);
+    const m = vals(minute);
+    if (h.length === 1 && m.length === 1) {
+      time = `${String(h[0]).padStart(2, "0")}:${String(m[0]).padStart(2, "0")}`;
+      if (sec && sec.size === 1) time += `:${String(vals(sec)[0]).padStart(2, "0")}`;
+    } else {
+      time = `在 ${join(hour)} 点 ${join(minute)} 分`;
+    }
+  }
+
+  const description =
+    date === "每天"
+      ? time.startsWith("每")
+        ? `${time}执行一次`
+        : `每天 ${time} 执行`
+      : `${date} ${time} 执行`;
+  return { normalized: parts.join(" "), fields: parts.length, description };
+}
+

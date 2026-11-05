@@ -25,21 +25,17 @@ const GROUP_PY: Record<Group, string> = {
 };
 
 export const TOOLS: ToolMeta[] = [
-  { id: "timestamp", name: "时间戳转换", group: "转换", desc: "秒 / 毫秒与日期互转，一次看到 10 个时区", icon: "Clock", py: "sjczz" },
-  { id: "color", name: "颜色转换", group: "转换", desc: "HEX / RGB / HSL 互转，带取色与对比度", icon: "Palette", py: "yszh" },
+  { id: "converter", name: "转换器", group: "转换", desc: "Base64 / URL / 时间戳 / 进制 / JSON↔YAML↔XML / 颜色 / Unicode / 人民币大写", icon: "ArrowLeftRight", py: "zhq" },
 
-  { id: "base64", name: "Base64 编解码", group: "编解码", desc: "文本与图片的 Base64 双向转换", icon: "Binary", py: "bjm" },
-  { id: "url", name: "URL 编解码", group: "编解码", desc: "百分号编码、URL 拆解与查询参数", icon: "Link", py: "bjm" },
   { id: "jwt", name: "JWT 解析", group: "编解码", desc: "解开 header / payload，校验签名", icon: "KeyRound", py: "jx" },
 
   { id: "hash", name: "哈希计算", group: "生成", desc: "MD5 / SHA-1 / SHA-256 / SHA-512 / SM3 / FNV-1a 与 HMAC", icon: "Hash", py: "xsjs" },
   { id: "password", name: "密码生成", group: "生成", desc: "可配置字符集与长度的随机密码", icon: "Lock", py: "mmsc" },
   { id: "uuid", name: "UUID 生成", group: "生成", desc: "批量生成 v4 / v7，支持格式化", icon: "Fingerprint", py: "sc" },
   { id: "qrcode", name: "二维码", group: "生成", desc: "文本转二维码，可保存为图片", icon: "QrCode", py: "ewm" },
+  { id: "cron", name: "Cron 生成器", group: "生成", desc: "可视化拼出 crontab 表达式，中文回显与字段校验", icon: "CalendarClock", py: "cronscq" },
 
-  { id: "json", name: "JSON 格式化", group: "文本", desc: "美化、压缩、排序键、校验结构", icon: "Braces", py: "gsh" },
-  { id: "format", name: "SQL 格式化", group: "文本", desc: "SQL 美化与压缩", icon: "Wand2", py: "gsh" },
-  { id: "jsformat", name: "JS 格式化", group: "文本", desc: "JavaScript / TypeScript 美化，与 Prettier 风格一致", icon: "FileCode2", py: "gsh" },
+  { id: "formatter", name: "格式化器", group: "文本", desc: "JSON / SQL / JS / XML / HTML / CSS / YAML / Markdown / URL 参数", icon: "Wand2", py: "gshq" },
   { id: "kvjson", name: "键值转 JSON", group: "文本", desc: "Debezium / 日志里的 {k=v} 文本转成缩进树与 JSON", icon: "Brackets", py: "jzz" },
   { id: "regex", name: "正则测试", group: "文本", desc: "实时高亮匹配结果与捕获组", icon: "Regex", py: "zzcs" },
   { id: "diff", name: "文本对比", group: "文本", desc: "逐行 diff，看清增删改", icon: "GitCompare", py: "wbdb" },
