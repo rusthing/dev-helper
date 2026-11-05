@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
-import { Search, Star } from "lucide-react";
+import { ChevronDown, Search, Star } from "lucide-react";
 import { Icon } from "./Icon";
 import { GROUPS, TOOLS, matchTool, type ToolMeta } from "../lib/tools";
+import { loadCollapsedGroups, saveCollapsedGroups } from "../lib/store";
 import logoUrl from "../assets/logo-mark.svg";
 
 interface Props {
@@ -13,6 +14,19 @@ interface Props {
 
 export function Sidebar({ active, favorites, onSelect, onToggleFav }: Props) {
   const [q, setQ] = useState("");
+  const [collapsed, setCollapsed] = useState<string[]>(loadCollapsedGroups);
+
+  function toggleGroup(label: string) {
+    setCollapsed((prev) => {
+      const next = prev.includes(label)
+        ? prev.filter((x) => x !== label)
+        : [...prev, label];
+      saveCollapsedGroups(next);
+      return next;
+    });
+  }
+
+  const searching = q.trim().length > 0;
 
   const { fav, rest } = useMemo(() => {
     const hit = (t: ToolMeta) => matchTool(t, q);
@@ -63,21 +77,34 @@ export function Sidebar({ active, favorites, onSelect, onToggleFav }: Props) {
           </>
         )}
 
-        {rest.map((s) => (
-          <div key={s.label}>
-            <div className="nav-group__label">{s.label}</div>
-            {s.items.map((t) => (
-              <NavItem
-                key={t.id}
-                tool={t}
-                active={active === t.id}
-                fav={favorites.includes(t.id)}
-                onSelect={onSelect}
-                onToggleFav={onToggleFav}
-              />
-            ))}
-          </div>
-        ))}
+        {rest.map((s) => {
+          const open = searching || !collapsed.includes(s.label);
+          return (
+            <div key={s.label}>
+              <button
+                type="button"
+                className={`nav-group__label nav-group__toggle ${open ? "" : "is-collapsed"}`}
+                onClick={() => toggleGroup(s.label)}
+                aria-expanded={open}
+                title={open ? `收起${s.label}` : `展开${s.label}`}
+              >
+                <span>{s.label}</span>
+                <ChevronDown className="nav-group__chev" size={13} />
+              </button>
+              {open &&
+                s.items.map((t) => (
+                  <NavItem
+                    key={t.id}
+                    tool={t}
+                    active={active === t.id}
+                    fav={favorites.includes(t.id)}
+                    onSelect={onSelect}
+                    onToggleFav={onToggleFav}
+                  />
+                ))}
+            </div>
+          );
+        })}
 
         {fav.length === 0 && rest.length === 0 && (
           <div className="nav-group__label">没有匹配的工具</div>

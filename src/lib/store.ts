@@ -1,19 +1,21 @@
 const FAV_KEY = "dh-favs";
 
-/** 合并进工具箱后，旧的顶层菜单 id 统一迁移到 toolbox，避免老收藏凭空消失 */
+/** 旧顶层菜单拆回三个入口后，把历史收藏 id 指到对应的新菜单，避免入口丢失 */
 const LEGACY_FAV: Record<string, string> = {
-  timestamp: "toolbox",
-  color: "toolbox",
-  base64: "toolbox",
-  url: "toolbox",
-  json: "toolbox",
-  format: "toolbox",
-  jsformat: "toolbox",
-  jwt: "toolbox",
-  kvjson: "toolbox",
-  formatter: "toolbox",
-  converter: "toolbox",
-  cron: "toolbox",
+  toolbox: "formatter",
+  formatter: "formatter",
+  json: "formatter",
+  format: "formatter",
+  jsformat: "formatter",
+  converter: "converter",
+  timestamp: "converter",
+  base64: "converter",
+  url: "converter",
+  kvjson: "converter",
+  parser: "parser",
+  color: "parser",
+  jwt: "parser",
+  cron: "parser",
 };
 
 export function loadFavs(): string[] {
@@ -36,4 +38,26 @@ export function loadFavs(): string[] {
 
 export function saveFavs(ids: string[]) {
   localStorage.setItem(FAV_KEY, JSON.stringify(ids));
+}
+
+const COLLAPSE_KEY = "dh-collapsed-groups";
+
+/** 侧边栏分组折叠状态；默认全部展开（空数组） */
+export function loadCollapsedGroups(): string[] {
+  try {
+    const raw = localStorage.getItem(COLLAPSE_KEY);
+    if (!raw) return [];
+    const v: unknown = JSON.parse(raw);
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveCollapsedGroups(groups: string[]) {
+  try {
+    localStorage.setItem(COLLAPSE_KEY, JSON.stringify(groups));
+  } catch {
+    /* 存储不可用时只影响本次折叠记忆 */
+  }
 }

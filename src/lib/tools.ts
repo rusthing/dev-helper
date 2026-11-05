@@ -1,4 +1,4 @@
-export type Group = "工具箱" | "生成" | "文本";
+export type Group = "开发者工具" | "生成" | "文本";
 
 export interface ToolMeta {
   id: string;
@@ -14,17 +14,19 @@ export interface ToolMeta {
   py: string;
 }
 
-export const GROUPS: Group[] = ["工具箱", "生成", "文本"];
+export const GROUPS: Group[] = ["开发者工具", "生成", "文本"];
 
 /** 分组名也支持拼音首字母，搜 wb 就能把文本组全带出来 */
 const GROUP_PY: Record<Group, string> = {
-  工具箱: "gjx",
+  开发者工具: "kfgj",
   生成: "sc",
   文本: "wb",
 };
 
 export const TOOLS: ToolMeta[] = [
-  { id: "toolbox", name: "工具箱", group: "工具箱", desc: "格式化 / 转换 / 解析：JSON、SQL、XML、Base64、URL、JWT、Cron、人民币大写等，Tab 按使用频次自动排序", icon: "Wrench", py: "gjx" },
+  { id: "formatter", name: "格式化", group: "开发者工具", desc: "JSON / SQL / JavaScript / XML / HTML / CSS / YAML / Markdown / URL 参数", icon: "Wand2", py: "gsh" },
+  { id: "converter", name: "转换", group: "开发者工具", desc: "时间戳 / Base64 / URL / 进制 / JSON↔YAML↔XML / 键值→JSON / Unicode / 人民币大写", icon: "ArrowLeftRight", py: "zh" },
+  { id: "parser", name: "解析", group: "开发者工具", desc: "JWT / 颜色 / JSON / URL / 时间戳 / Cron / User-Agent", icon: "ScanSearch", py: "jx" },
 
   { id: "hash", name: "哈希计算", group: "生成", desc: "MD5 / SHA-1 / SHA-256 / SHA-512 / SM3 / FNV-1a 与 HMAC", icon: "Hash", py: "xsjs" },
   { id: "password", name: "密码生成", group: "生成", desc: "可配置字符集与长度的随机密码", icon: "Lock", py: "mmsc" },

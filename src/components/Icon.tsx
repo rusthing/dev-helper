@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   Circle,
   Fingerprint,
   GitCompare,
@@ -6,8 +7,9 @@ import {
   Lock,
   QrCode,
   Regex,
+  ScanSearch,
   Type,
-  Wrench,
+  Wand2,
 } from "lucide-react";
 import type { LucideIcon, LucideProps } from "lucide-react";
 
@@ -16,14 +18,16 @@ import type { LucideIcon, LucideProps } from "lucide-react";
  * 用 `import { icons }` 全量字典会让 bundle 多出 900KB。
  */
 const MAP: Record<string, LucideIcon> = {
+  ArrowLeftRight,
   Fingerprint,
   GitCompare,
   Hash,
   Lock,
   QrCode,
   Regex,
+  ScanSearch,
   Type,
-  Wrench,
+  Wand2,
 };
 
 export function Icon({ name, ...rest }: { name: string } & LucideProps) {

@@ -142,6 +142,35 @@ body {
   padding: 12px 8px 5px;
 }
 
+/* 分组标题兼折叠按钮：整行可点，箭头表示展开状态 */
+.nav-group__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: var(--font-sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.nav-group__toggle:hover {
+  color: var(--text-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.nav-group__chev {
+  margin-left: auto;
+  color: var(--text-muted);
+  transition: transform 0.15s;
+}
+
+.nav-group__toggle.is-collapsed .nav-group__chev {
+  transform: rotate(-90deg);
+}
+
 .nav-item {
   display: flex;
   align-items: center;
@@ -1183,18 +1212,6 @@ html.theme-fading *::after {
   color: var(--text);
   font-weight: 600;
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.06);
-}
-
-/* 工具箱顶部的「格式化 / 转换 / 解析」分组条，比组内 Tab 再重一档 */
-.group-tabs .tabs {
-  margin-bottom: 10px;
-  background: var(--surface);
-}
-
-.group-tabs .tab {
-  height: 34px;
-  padding: 0 16px;
-  font-size: var(--fs-base);
 }
 
 /* ---------- 解析器结果网格 ---------- */

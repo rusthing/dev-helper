@@ -15,7 +15,9 @@ import {
 } from "./lib/theme";
 import { loadFavs, saveFavs } from "./lib/store";
 import { IS_TAURI } from "./lib/api";
-import Toolbox from "./pages/Toolbox";
+import Formatter from "./pages/Formatter";
+import Converter from "./pages/Converter";
+import Parser from "./pages/Parser";
 import Hash from "./pages/Hash";
 import Password from "./pages/Password";
 import Uuid from "./pages/Uuid";
@@ -25,7 +27,9 @@ import Diff from "./pages/Diff";
 import Text from "./pages/Text";
 
 const PAGES: Record<string, ComponentType> = {
-  toolbox: Toolbox,
+  formatter: Formatter,
+  converter: Converter,
+  parser: Parser,
   hash: Hash,
   password: Password,
   uuid: Uuid,
@@ -37,7 +41,7 @@ const PAGES: Record<string, ComponentType> = {
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadTheme);
-  const [active, setActive] = useState("toolbox");
+  const [active, setActive] = useState("formatter");
   const [favorites, setFavorites] = useState<string[]>(loadFavs);
 
   useEffect(() => {
