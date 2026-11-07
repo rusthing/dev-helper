@@ -8,6 +8,7 @@ const LEGACY_FAV: Record<string, string> = {
   format: "formatter",
   jsformat: "formatter",
   converter: "converter",
+  timestamp: "converter",
   base64: "converter",
   url: "converter",
   kvjson: "converter",

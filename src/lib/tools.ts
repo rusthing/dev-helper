@@ -24,7 +24,6 @@ const GROUP_PY: Record<Group, string> = {
 };
 
 export const TOOLS: ToolMeta[] = [
-  { id: "timestamp", name: "时间戳转换", group: "开发者工具", desc: "秒 / 毫秒与日期互转，一次看到 10 个时区", icon: "Clock", py: "sjczz" },
   { id: "formatter", name: "格式化", group: "开发者工具", desc: "JSON / SQL / JavaScript / XML / HTML / CSS / YAML / Markdown / URL 参数", icon: "Wand2", py: "gsh" },
   { id: "converter", name: "转换", group: "开发者工具", desc: "时间戳 / Base64 / URL / 进制 / JSON↔YAML↔XML / 键值→JSON / Unicode / 人民币大写", icon: "ArrowLeftRight", py: "zh" },
   { id: "parser", name: "解析", group: "开发者工具", desc: "JWT / 颜色 / JSON / URL / 时间戳 / Cron / User-Agent", icon: "ScanSearch", py: "jx" },

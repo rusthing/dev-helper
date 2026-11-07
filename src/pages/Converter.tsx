@@ -6,8 +6,10 @@ import { Segmented } from "../components/Segmented";
 import { Tabs, type TabItem } from "../components/Tabs";
 import { call } from "../lib/api";
 import { useTabUsage } from "../lib/tabUsage";
+import Timestamp from "./Timestamp";
 
 type TabId =
+  | "timestamp"
   | "base64"
   | "url"
   | "radix"
@@ -18,6 +20,7 @@ type TabId =
   | "rmb";
 
 const TABS: TabItem<TabId>[] = [
+  { id: "timestamp", label: "时间戳" },
   { id: "base64", label: "Base64" },
   { id: "url", label: "URL" },
   { id: "radix", label: "进制" },
@@ -341,7 +344,7 @@ function RmbTab() {
 }
 
 export default function Converter() {
-  const [active, setActive] = useState<TabId>("base64");
+  const [active, setActive] = useState<TabId>("timestamp");
   const { items, record } = useTabUsage("converter", TABS);
 
   function select(id: TabId) {
@@ -352,6 +355,9 @@ export default function Converter() {
   return (
     <>
       <Tabs value={active} items={items} onChange={select} />
+      <div hidden={active !== "timestamp"}>
+        <Timestamp />
+      </div>
       <div hidden={active !== "base64"}>
         <Base64Tab />
       </div>
