@@ -24,9 +24,9 @@ const GROUP_PY: Record<Group, string> = {
 };
 
 export const TOOLS: ToolMeta[] = [
-  { id: "formatter", name: "格式化", group: "开发者工具", desc: "JSON / SQL / JavaScript / XML / HTML / CSS / YAML / Markdown / URL 参数", icon: "Wand2", py: "gsh" },
   { id: "converter", name: "转换", group: "开发者工具", desc: "时间戳 / Base64 / URL / 进制 / JSON↔YAML↔XML / 键值→JSON / Unicode / 人民币大写", icon: "ArrowLeftRight", py: "zh" },
   { id: "parser", name: "解析", group: "开发者工具", desc: "JWT / 颜色 / JSON / URL / 时间戳 / Cron / User-Agent", icon: "ScanSearch", py: "jx" },
+  { id: "formatter", name: "格式化", group: "开发者工具", desc: "JSON / SQL / JavaScript / XML / HTML / CSS / YAML / Markdown / URL 参数", icon: "Wand2", py: "gsh" },
 
   { id: "hash", name: "哈希计算", group: "生成", desc: "MD5 / SHA-1 / SHA-256 / SHA-512 / SM3 / FNV-1a 与 HMAC", icon: "Hash", py: "xsjs" },
   { id: "password", name: "密码生成", group: "生成", desc: "可配置字符集与长度的随机密码", icon: "Lock", py: "mmsc" },
