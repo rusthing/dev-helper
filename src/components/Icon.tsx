@@ -1,6 +1,7 @@
 import {
   ArrowLeftRight,
   Circle,
+  Clock,
   Fingerprint,
   GitCompare,
   Hash,
@@ -19,6 +20,7 @@ import type { LucideIcon, LucideProps } from "lucide-react";
  */
 const MAP: Record<string, LucideIcon> = {
   ArrowLeftRight,
+  Clock,
   Fingerprint,
   GitCompare,
   Hash,

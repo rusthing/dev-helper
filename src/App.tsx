@@ -15,6 +15,7 @@ import {
 } from "./lib/theme";
 import { loadFavs, saveFavs } from "./lib/store";
 import { IS_TAURI } from "./lib/api";
+import Timestamp from "./pages/Timestamp";
 import Formatter from "./pages/Formatter";
 import Converter from "./pages/Converter";
 import Parser from "./pages/Parser";
@@ -27,6 +28,7 @@ import Diff from "./pages/Diff";
 import Text from "./pages/Text";
 
 const PAGES: Record<string, ComponentType> = {
+  timestamp: Timestamp,
   formatter: Formatter,
   converter: Converter,
   parser: Parser,
@@ -41,7 +43,7 @@ const PAGES: Record<string, ComponentType> = {
 
 export default function App() {
   const [theme, setTheme] = useState<Theme>(loadTheme);
-  const [active, setActive] = useState("formatter");
+  const [active, setActive] = useState("timestamp");
   const [favorites, setFavorites] = useState<string[]>(loadFavs);
 
   useEffect(() => {

@@ -31,7 +31,7 @@
 
 | 分组 | 工具 | 说明 |
 |---|---|---|
-| 转换 | 时间戳转换 | 秒 / 毫秒 / 微秒 / 纳秒与日期互转，一次看到 10 个时区 |
+| 开发者工具 | 时间戳转换 | 秒 / 毫秒 / 微秒 / 纳秒与日期互转，一次看到 10 个时区 |
 | 转换 | 颜色转换 | HEX / HEX8 / RGB / HSL 互转，带 WCAG 对比度 |
 | 编解码 | Base64 | 文本编解码，支持 URL 安全字符与去 padding |
 | 编解码 | URL 编解码 | 百分号编解码 + URL 拆解 + 查询参数 |
@@ -80,7 +80,7 @@ pnpm tauri build -- --bundles app
 src/
   components/    Card / CopyButton / Segmented / Sidebar / Header / StatusBar / Icon
   lib/           tools.ts（工具元数据）api.ts（IPC 封装）mock.ts（浏览器假后端）theme.ts store.ts
-  pages/         16 个工具页面
+  pages/         顶层 11 个页面（格式化 / 转换 / 解析 3 个聚合页 + 时间戳转换等 8 个独立页；颜色 / URL / Cron / JWT / JSON / UA 等为聚合页内嵌面板）
   styles/        theme.css（亮暗变量）app.css（布局与组件）
   assets/        logo-mark.svg（侧边栏品牌图标：机器人本体，无底块）
 src-tauri/

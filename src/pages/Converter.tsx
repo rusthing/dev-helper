@@ -6,10 +6,8 @@ import { Segmented } from "../components/Segmented";
 import { Tabs, type TabItem } from "../components/Tabs";
 import { call } from "../lib/api";
 import { useTabUsage } from "../lib/tabUsage";
-import type { TsResult } from "../lib/types";
 
 type TabId =
-  | "timestamp"
   | "base64"
   | "url"
   | "radix"
@@ -20,7 +18,6 @@ type TabId =
   | "rmb";
 
 const TABS: TabItem<TabId>[] = [
-  { id: "timestamp", label: "时间戳" },
   { id: "base64", label: "Base64" },
   { id: "url", label: "URL" },
   { id: "radix", label: "进制" },
@@ -202,29 +199,6 @@ function UrlTab() {
   );
 }
 
-function TimestampTab() {
-  return (
-    <ConvertPanel
-      sample={String(Date.now())}
-      placeholder="秒 / 毫秒 / 微秒 / 纳秒时间戳，或 2026-11-05 10:00:00"
-      hint="自动识别单位和日期，一次给出秒、毫秒、ISO 与 10 个时区的表示。"
-      rows={4}
-      run={async (input) => {
-        const r = await call<TsResult>("convert_timestamp", { input });
-        if (r.millis === null) throw "无法识别这个时间格式";
-        const lines = [
-          ...r.units.map((u) => `${u.label}: ${u.value}`),
-          "",
-          ...r.reps.map((x) => `${x.label}: ${x.value}`),
-          "",
-          ...r.zones.map((z) => `${z.name} (${z.id}, UTC${z.offset}) ${z.datetime} ${z.weekday}`),
-        ];
-        return lines.join("\n");
-      }}
-    />
-  );
-}
-
 function RadixTab() {
   return (
     <ConvertPanel
@@ -367,7 +341,7 @@ function RmbTab() {
 }
 
 export default function Converter() {
-  const [active, setActive] = useState<TabId>("timestamp");
+  const [active, setActive] = useState<TabId>("base64");
   const { items, record } = useTabUsage("converter", TABS);
 
   function select(id: TabId) {
@@ -378,9 +352,6 @@ export default function Converter() {
   return (
     <>
       <Tabs value={active} items={items} onChange={select} />
-      <div hidden={active !== "timestamp"}>
-        <TimestampTab />
-      </div>
       <div hidden={active !== "base64"}>
         <Base64Tab />
       </div>

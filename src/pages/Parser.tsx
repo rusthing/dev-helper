@@ -8,17 +8,15 @@ import { useTabUsage } from "../lib/tabUsage";
 import type { JwtParts } from "../lib/types";
 import ColorPanel from "./Color";
 import UrlPanel from "./Url";
-import TimestampPanel from "./Timestamp";
 import CronPanel from "./Cron";
 
-type TabId = "jwt" | "color" | "json" | "url" | "timestamp" | "cron" | "ua";
+type TabId = "jwt" | "color" | "json" | "url" | "cron" | "ua";
 
 const TABS: TabItem<TabId>[] = [
   { id: "jwt", label: "JWT" },
   { id: "color", label: "颜色" },
   { id: "json", label: "JSON" },
   { id: "url", label: "URL" },
-  { id: "timestamp", label: "时间戳" },
   { id: "cron", label: "Cron" },
   { id: "ua", label: "User-Agent" },
 ];
@@ -474,9 +472,6 @@ export default function Parser() {
       </div>
       <div hidden={active !== "url"}>
         <UrlPanel />
-      </div>
-      <div hidden={active !== "timestamp"}>
-        <TimestampPanel />
       </div>
       <div hidden={active !== "cron"}>
         <CronPanel />
